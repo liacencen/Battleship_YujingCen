@@ -412,4 +412,122 @@ nav a:hover {
     height: 25px;
     font-size: 12px;
   }
+}
+
+/* Ship placement styles */
+.ship-placement-container {
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.orientation-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.orientation-btn:hover {
+  background-color: #0069d9;
+}
+
+.placement-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.ship-preview {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.ship-drag {
+  background-color: #28a745;
+  color: white;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 12px;
+  user-select: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s;
+}
+
+.ship-drag:hover {
+  transform: scale(1.05);
+}
+
+.ship-drag:active {
+  cursor: grabbing;
+}
+
+.ship-drag.horizontal {
+  flex-direction: row;
+}
+
+.ship-drag.vertical {
+  flex-direction: column;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.placement-grid {
+  display: grid;
+  grid-template-rows: repeat(10, 30px);
+  grid-gap: 1px;
+  margin-bottom: 15px;
+}
+
+.placement-row {
+  display: grid;
+  grid-template-columns: repeat(10, 30px);
+  grid-gap: 1px;
+}
+
+.placement-cell {
+  width: 30px;
+  height: 30px;
+  background-color: #add8e6;
+  border: 1px solid navy;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.placement-cell:hover {
+  background-color: #90c7e0;
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+.placement-cell.valid-placement {
+  background-color: #90ee90;
+  border-color: #228B22;
+}
+
+.placement-cell.invalid-placement {
+  background-color: #ffcccb;
+  border-color: #B22222;
+}
+
+.placement-cell.occupied {
+  background-color: #28a745;
+  border-color: #1b7e31;
+}
+
+.placement-help {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
 } 

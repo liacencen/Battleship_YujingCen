@@ -4,17 +4,18 @@ import { GameContext } from '../../context/GameContext';
 const Timer = () => {
   const { gameState } = useContext(GameContext);
   
-  // Format seconds to MM:SS
+  // Format seconds to mm:ss
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
   
   return (
-    <p className="timer">
-      Time: <span id="timer">{formatTime(gameState.timer)}</span>
-    </p>
+    <div className="timer">
+      Game Time: {formatTime(gameState.timer)}
+    </div>
   );
 };
 
