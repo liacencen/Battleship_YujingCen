@@ -19,7 +19,7 @@ const Cell = ({ type, value, onClick }) => {
   // Determine which icon to display
   const renderIcon = () => {
     if (value === 'hit') {
-      return '✖'; // Red X for hits
+      return 'X'; // Red X for hits
     } else if (value === 'miss') {
       return '✓'; // Green check for misses
     } else if (value === 'ship' && type === 'player') {
@@ -39,7 +39,7 @@ const Cell = ({ type, value, onClick }) => {
     <div 
       className={getCellClassName()}
       onClick={handleClick}
-      title={`Cell ${type === 'player' ? 'Player' : 'AI'}`}
+      title={`${type === 'player' ? 'Your' : 'Enemy'} board cell`}
     >
       {renderIcon()}
     </div>

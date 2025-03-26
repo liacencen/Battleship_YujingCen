@@ -6,7 +6,6 @@ const Board = ({ type }) => {
   const { gameState, playerMove } = useContext(GameContext);
   
   if (!gameState || !gameState.playerBoard || !gameState.aiBoard) {
-    console.error("Invalid game state in Board component:", gameState);
     return (
       <div className="board-section">
         <h2>{type === 'player' ? 'Your Board' : 'Enemy Board'}</h2>
@@ -18,46 +17,44 @@ const Board = ({ type }) => {
   const board = type === 'player' ? gameState.playerBoard : gameState.aiBoard;
 
   const handleCellClick = (row, col) => {
-    // Only allow clicks on AI board when it's player's turn and the game is in playing state
     if (type === 'ai' && gameState.currentTurn === 'player' && gameState.gameStatus === 'playing') {
-      console.log(`Clicking on AI board at ${row}, ${col}`);
       playerMove(row, col);
-    } else if (type === 'ai') {
-      console.log(`Cannot click AI board: currentTurn=${gameState.currentTurn}, gameStatus=${gameState.gameStatus}`);
     }
   };
 
-  // Generate 10x10 grid of cells
-  const renderGrid = () => {
-    const grid = [];
+  // Render the 10x10 grid
+  const renderRows = () => {
+    const rows = [];
     
-    for (let rowIndex = 0; rowIndex < 10; rowIndex++) {
-      for (let colIndex = 0; colIndex < 10; colIndex++) {
-        grid.push(
+    for (let i = 0; i < 10; i++) {
+      const cells = [];
+      for (let j = 0; j < 10; j++) {
+        cells.push(
           <Cell
-            key={`${type}-${rowIndex}-${colIndex}`}
+            key={`${i}-${j}`}
             type={type}
-            value={board[rowIndex][colIndex]}
-            onClick={() => handleCellClick(rowIndex, colIndex)}
+            value={board[i][j]}
+            onClick={() => handleCellClick(i, j)}
           />
         );
       }
+      rows.push(<div key={`row-${i}`} className="grid-row">{cells}</div>);
     }
     
-    return grid;
+    return rows;
   };
 
   return (
     <div className="board-section">
       <h2>{type === 'player' ? 'Your Board' : 'Enemy Board'}</h2>
       <div className={`grid ${type}-board`}>
-        {renderGrid()}
+        {renderRows()}
       </div>
-      {type === 'player' && gameState.currentTurn === 'ai' && gameState.gameStatus === 'playing' && (
+      {type === 'player' && gameState.currentTurn === 'ai' && !gameState.winner && (
         <div className="turn-indicator">AI is thinking...</div>
       )}
-      {type === 'ai' && gameState.currentTurn === 'player' && gameState.gameStatus === 'playing' && (
-        <div className="turn-indicator">Your turn</div>
+      {type === 'ai' && gameState.currentTurn === 'player' && !gameState.winner && (
+        <div className="turn-indicator">Your turn! Select a square on the enemy board.</div>
       )}
     </div>
   );
