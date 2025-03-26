@@ -12,6 +12,9 @@ import Game from './pages/Game';
 import Rules from './pages/Rules';
 import HighScores from './pages/HighScores';
 
+// Import global styles
+import './styles/global.css';
+
 function App() {
   return (
     <GameProvider>
@@ -21,7 +24,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/game/normal" element={<Game mode="normal" />} />
-            <Route path="/game/easy" element={<Game mode="easy" />} />
+            <Route path="/game/freeplay" element={<Game mode="freeplay" />} />
             <Route path="/rules" element={<Rules />} />
             <Route path="/highscores" element={<HighScores />} />
           </Routes>
