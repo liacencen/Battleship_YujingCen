@@ -23,8 +23,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/game/normal" element={<Game mode="normal" />} />
-            <Route path="/game/freeplay" element={<Game mode="freeplay" />} />
+            <Route path="/game/:mode" element={<Game />} />
             <Route path="/rules" element={<Rules />} />
             <Route path="/highscores" element={<HighScores />} />
           </Routes>

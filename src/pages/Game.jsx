@@ -6,20 +6,28 @@ import Timer from '../components/Timer/Timer';
 import ShipPlacement from '../components/ShipPlacement/ShipPlacement';
 
 const Game = () => {
-  const { mode } = useParams();
+  // Get mode from URL params
+  const params = useParams();
+  const gameMode = params.mode; // This should match the :mode parameter in your route
+  
   const navigate = useNavigate();
   const { gameState, setGameMode, resetGame, getCurrentShip } = useContext(GameContext);
   const [orientation, setOrientation] = useState('horizontal');
   
+  // For debugging
+  console.log("Game component rendered with mode:", gameMode);
+  console.log("Current game state:", gameState);
+  
   // Set game mode on component mount
   useEffect(() => {
-    if (mode === 'normal' || mode === 'freeplay') {
-      setGameMode(mode);
+    console.log("Setting game mode:", gameMode);
+    if (gameMode === 'normal' || gameMode === 'freeplay') {
+      setGameMode(gameMode);
     } else {
       // Invalid mode, redirect to home
       navigate('/');
     }
-  }, [mode, setGameMode, navigate]);
+  }, [gameMode, setGameMode, navigate]);
   
   // Toggle ship orientation
   const toggleOrientation = () => {
@@ -56,9 +64,13 @@ const Game = () => {
     );
   };
   
+  if (!gameState.mode) {
+    return <div className="game-container"><p>Loading game...</p></div>;
+  }
+  
   return (
     <div className="game-container">
-      <h1>Battleship - {mode.charAt(0).toUpperCase() + mode.slice(1)} Mode</h1>
+      <h1>Battleship - {gameState.mode.charAt(0).toUpperCase() + gameState.mode.slice(1)} Mode</h1>
       
       {/* Ship placement UI */}
       {renderShipPlacement()}
