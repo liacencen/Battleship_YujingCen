@@ -19,6 +19,7 @@ main {
   flex: 1;
   margin-top: 70px;
   padding: 20px;
+  padding-bottom: 60px;
 }
 
 /* Hero Section */
@@ -87,10 +88,9 @@ nav a:hover {
   color: white;
   font-size: 12px;
   font-weight: bold;
-  position: fixed;
-  bottom: 0;
   width: 100%;
   box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: auto;
 }
 
 .branding {
@@ -200,8 +200,7 @@ nav a:hover {
   align-items: center;
   justify-content: center;
   padding: 10px;
-  margin-top: 80px;
-  margin-bottom: 80px;
+  margin-bottom: 20px;
 }
 
 .game-container h1 {
@@ -298,8 +297,7 @@ nav a:hover {
   background: white;
   border-radius: 12px;
   box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 80px;
-  margin-bottom: 80px;
+  margin-bottom: 20px;
 }
 
 .scores-table {
@@ -354,8 +352,7 @@ nav a:hover {
   border-radius: 12px;
   box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.1);
   text-align: left;
-  margin-top: 80px;
-  margin-bottom: 80px;
+  margin-bottom: 20px;
 }
 
 .rules-content {
