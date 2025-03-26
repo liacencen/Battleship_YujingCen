@@ -118,22 +118,28 @@ export const GameProvider = ({ children }) => {
 
   // Set game mode
   const setGameMode = (mode) => {
+    console.log("Setting game mode to:", mode);
     setGameState(prevState => {
       // Create new game state with selected mode
       const newState = {
         ...initialState,
         mode
       };
+      console.log("New state created:", newState);
       
       // If mode is freeplay, auto-place AI ships
       if (mode === 'freeplay') {
-        return placeAiShips(newState);
+        const stateWithAiShips = placeAiShips(newState);
+        console.log("State with AI ships:", stateWithAiShips);
+        return stateWithAiShips;
       }
       
       // If mode is normal, auto-place all ships
       if (mode === 'normal') {
         const stateWithAiShips = placeAiShips(newState);
-        return placePlayerShipsAutomatically(stateWithAiShips);
+        const finalState = placePlayerShipsAutomatically(stateWithAiShips);
+        console.log("Final state with all ships:", finalState);
+        return finalState;
       }
       
       return newState;

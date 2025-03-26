@@ -15,6 +15,10 @@ import HighScores from './pages/HighScores';
 // Import global styles
 import './styles/global.css';
 
+// Clear localStorage for a fresh start (remove this in production)
+console.log("App initialized, clearing any existing game state");
+localStorage.removeItem('battleshipGame');
+
 function App() {
   return (
     <GameProvider>
