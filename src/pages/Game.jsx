@@ -52,24 +52,30 @@ const Game = () => {
   
   // Reset localStorage on mount or if there's an issue
   useEffect(() => {
-    const resetLocalStorageIfNeeded = () => {
+    const checkAndResetLocalStorage = () => {
       try {
         const savedState = localStorage.getItem('battleshipGame');
         if (savedState) {
           const parsedState = JSON.parse(savedState);
+          
           // If saved mode doesn't match current mode, reset
           if (parsedState.mode && parsedState.mode !== gameMode) {
-            console.log("Resetting localStorage due to mode mismatch");
+            console.log(`Mode mismatch: saved=${parsedState.mode}, current=${gameMode}. Resetting localStorage.`);
+            localStorage.removeItem('battleshipGame');
+          } 
+          // If game was ended but not cleared, reset
+          else if (parsedState.gameStatus === 'ended') {
+            console.log('Previous game was ended. Resetting localStorage.');
             localStorage.removeItem('battleshipGame');
           }
         }
       } catch (e) {
-        console.error("Error checking localStorage, resetting:", e);
+        console.error("Error with localStorage, resetting:", e);
         localStorage.removeItem('battleshipGame');
       }
     };
     
-    resetLocalStorageIfNeeded();
+    checkAndResetLocalStorage();
   }, [gameMode]);
   
   // Set game mode on component mount

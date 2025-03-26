@@ -70,10 +70,16 @@ export const GameProvider = ({ children }) => {
 
   // Save to localStorage when state changes
   useEffect(() => {
-    if (gameState.gameStatus !== 'ended') {
-      localStorage.setItem('battleshipGame', JSON.stringify(gameState));
-    } else {
-      localStorage.removeItem('battleshipGame');
+    // Only save game state if it's not initial state and game has started
+    if (gameState.mode) {
+      // Don't save to localStorage if the game has ended
+      if (gameState.gameStatus === 'ended') {
+        console.log("Game ended, removing from localStorage");
+        localStorage.removeItem('battleshipGame');
+      } else {
+        console.log("Saving game state to localStorage:", gameState.mode, gameState.gameStatus);
+        localStorage.setItem('battleshipGame', JSON.stringify(gameState));
+      }
     }
   }, [gameState]);
 
@@ -112,8 +118,9 @@ export const GameProvider = ({ children }) => {
 
   // Reset game
   const resetGame = () => {
-    setGameState(initialState);
+    console.log("Resetting game and clearing localStorage");
     localStorage.removeItem('battleshipGame');
+    setGameState(initialState);
   };
 
   // Set game mode

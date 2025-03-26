@@ -19,17 +19,27 @@ const Cell = ({ type, value, onClick }) => {
   // Determine which icon to display
   const renderIcon = () => {
     if (value === 'hit') {
-      return type === 'player' ? '⚫' : '✔';
+      return '✖'; // Red X for hits
     } else if (value === 'miss') {
-      return '❌';
+      return '✓'; // Green check for misses
+    } else if (value === 'ship' && type === 'player') {
+      return '●'; // Black dot for ships on player's board
     }
     return null;
+  };
+  
+  // Don't allow clicking on cells that are already hit or missed
+  const handleClick = () => {
+    if (value !== 'hit' && value !== 'miss') {
+      onClick();
+    }
   };
   
   return (
     <div 
       className={getCellClassName()}
-      onClick={onClick}
+      onClick={handleClick}
+      title={`Cell ${type === 'player' ? 'Player' : 'AI'}`}
     >
       {renderIcon()}
     </div>

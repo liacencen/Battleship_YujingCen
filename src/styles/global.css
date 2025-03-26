@@ -251,19 +251,23 @@ nav a:hover {
 .grid {
   display: grid;
   grid-template-columns: repeat(10, 40px);
-  grid-gap: 0.5px;
+  grid-template-rows: repeat(10, 40px);
+  grid-gap: 1px;
   justify-content: center;
+  border: 2px solid navy;
+  margin: 10px 0;
+  background-color: #78b0c7;
 }
 
 .grid-cell {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   background-color: #add8e6;
-  border: 2px solid navy;
+  border: 1px solid navy;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out, transform 0.1s;
@@ -272,21 +276,26 @@ nav a:hover {
 .grid-cell:hover {
   transform: scale(1.05);
   border-color: #004080;
+  background-color: #90c7e0;
+  z-index: 10;
 }
 
 .grid-cell.hit {
   background-color: #f8d7da;
   border-color: #dc3545;
+  color: #dc3545;
 }
 
 .grid-cell.miss {
   background-color: #d1ecf1;
   border-color: #0c5460;
+  color: #28a745;
 }
 
 .grid-cell.ship {
   background-color: #d4edda;
   border-color: #28a745;
+  color: #000;
 }
 
 /* High Scores page */
@@ -592,12 +601,10 @@ nav a:hover {
 
 .turn-indicator {
   margin-top: 10px;
+  padding: 5px 15px;
   font-weight: bold;
-  color: #0056b3;
-  animation: blink 1.5s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  color: white;
+  background-color: #0056b3;
+  border-radius: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 } 
