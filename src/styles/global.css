@@ -21,6 +21,18 @@ main {
   padding: 20px;
 }
 
+/* Hero Section */
+.hero {
+  margin-top: 80px;
+  padding: 20px;
+}
+
+.hero h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  color: #004080;
+}
+
 /* Navigation */
 nav {
   background-color: #0056b3;
@@ -68,25 +80,52 @@ nav a:hover {
 }
 
 /* Footer */
-footer {
-  margin-top: auto;
+.footer {
   background-color: #004080;
-  color: white;
   padding: 15px;
   text-align: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .branding {
-  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.icons {
+  margin-top: 10px;
+}
+
+.icons a {
+  display: inline-block;
+  margin: 0 10px;
+  transition: transform 0.2s;
+}
+
+.icons a:hover {
+  transform: scale(1.1);
+}
+
+.icons svg {
+  width: 16px;
+  height: 16px;
+  fill: white;
+  transition: fill 0.3s;
+}
+
+.icons a:hover svg {
+  fill: #ffcc00;
 }
 
 /* Home page */
-.home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
 .hero-image {
   margin: 30px auto;
   text-align: center;
@@ -103,15 +142,11 @@ footer {
   transform: scale(1.03);
 }
 
-.game-mode-selection {
-  margin: 30px auto;
-}
-
 .mode-buttons {
   display: flex;
   justify-content: center;
   gap: 30px;
-  margin-top: 20px;
+  margin-top: 30px;
   flex-wrap: wrap;
 }
 
@@ -165,6 +200,8 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 10px;
+  margin-top: 80px;
+  margin-bottom: 80px;
 }
 
 .game-container h1 {
@@ -261,6 +298,8 @@ footer {
   background: white;
   border-radius: 12px;
   box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 80px;
+  margin-bottom: 80px;
 }
 
 .scores-table {
@@ -315,6 +354,8 @@ footer {
   border-radius: 12px;
   box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.1);
   text-align: left;
+  margin-top: 80px;
+  margin-bottom: 80px;
 }
 
 .rules-content {

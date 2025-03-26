@@ -5,11 +5,10 @@ const Navbar = () => {
   return (
     <nav>
       <ul>
-        <li><NavLink to="/" end>Home</NavLink></li>
-        <li><NavLink to="/game/normal">Normal Game</NavLink></li>
-        <li><NavLink to="/game/easy">Free Play</NavLink></li>
-        <li><NavLink to="/rules">Rules</NavLink></li>
-        <li><NavLink to="/highscores">High Scores</NavLink></li>
+        <li><NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''}>Home</NavLink></li>
+        <li><NavLink to="/game/normal" className={({ isActive }) => isActive ? 'active' : ''}>Game</NavLink></li>
+        <li><NavLink to="/rules" className={({ isActive }) => isActive ? 'active' : ''}>Rules</NavLink></li>
+        <li><NavLink to="/highscores" className={({ isActive }) => isActive ? 'active' : ''}>High Scores</NavLink></li>
       </ul>
     </nav>
   );
