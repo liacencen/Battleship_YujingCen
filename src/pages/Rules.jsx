@@ -19,29 +19,55 @@ const Rules = () => {
         </section>
         
         <section>
-          <h2>Game Objective</h2>
-          <p>The objective of the game is to sink all of your opponent's ships before they sink yours.</p>
+          <h2>Game Modes</h2>
+          <h3>Normal Mode</h3>
+          <p>In normal mode, your ships are placed automatically and you play against the AI. The AI uses a smart targeting strategy:</p>
+          <ul>
+            <li>When it hits a ship, it will focus on adjacent cells to try to sink the ship</li>
+            <li>If no adjacent cells are available, it will make random moves</li>
+            <li>This makes the AI more challenging and realistic</li>
+          </ul>
+
+          <h3>Free Play Mode</h3>
+          <p>In free play mode, you have control over ship placement:</p>
+          <ul>
+            <li>Drag and drop ships onto your board</li>
+            <li>Click on cells to place ships</li>
+            <li>Practice your strategy without AI interference</li>
+          </ul>
         </section>
         
         <section>
           <h2>How to Play</h2>
           <ol>
-            <li>At the start of the game, you drag and place your ships on your board.</li>
-            <li>You and the AI take turns firing at each other's grids by selecting a cell on the opponent's board.</li>
-            <li>If a shot hits a ship, the cell will be marked as a hit (✔).</li>
-            <li>If a shot misses, the cell will be marked as a miss (❌).</li>
-            <li>A ship is sunk when all its cells have been hit.</li>
-            <li>The game ends when all ships of one player have been sunk.</li>
+            <li>Choose your game mode (Normal or Free Play)</li>
+            <li>If in Free Play mode, place your ships by dragging them onto the board</li>
+            <li>You and the AI take turns firing at each other's grids by selecting a cell on the opponent's board</li>
+            <li>If a shot hits a ship, the cell will be marked as a hit (X)</li>
+            <li>If a shot misses, the cell will be marked as a miss (•)</li>
+            <li>A ship is sunk when all its cells have been hit</li>
+            <li>The game ends when all ships of one player have been sunk</li>
           </ol>
+        </section>
+
+        <section>
+          <h2>Game Features</h2>
+          <ul>
+            <li>Game state is automatically saved - you can continue your game even if you close the browser</li>
+            <li>Timer tracks how long you've been playing</li>
+            <li>Visual feedback for ship placement and hits</li>
+            <li>Responsive design works on both desktop and mobile devices</li>
+          </ul>
         </section>
         
         <section>
-          <h2>Game Modes</h2>
-          <h3>Normal Mode</h3>
-          <p>In normal mode, you play against the AI in a classic game of Battleship. You and the AI take turns firing at each other's board.</p>
-          
-          <h3>Free Play Mode</h3>
-          <p>In free play mode, you practice your strategy without an opponent. You can fire at the AI's board, but the AI will not take any turns or fire at your board.</p>
+          <h2>Tips for Success</h2>
+          <ul>
+            <li>Spread your ships out to make them harder to find</li>
+            <li>Pay attention to the AI's targeting pattern in normal mode</li>
+            <li>Use the free play mode to practice different strategies</li>
+            <li>Try to identify ship patterns based on hit locations</li>
+          </ul>
         </section>
       </div>
     </div>
