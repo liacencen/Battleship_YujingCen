@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // Create context
@@ -13,8 +13,8 @@ const SHIPS = [
   { id: 'destroyer', size: 2, name: 'Destroyer' }
 ];
 
-// Initial game state
-const initialState = {
+// Create a function to generate initial state
+const createInitialState = () => ({
   mode: null,
   playerBoard: Array(10).fill().map(() => Array(10).fill(null)),
   aiBoard: Array(10).fill().map(() => Array(10).fill(null)),
@@ -27,7 +27,7 @@ const initialState = {
   playerMoves: [],
   aiMoves: [],
   currentShipToPlace: 0
-};
+});
 
 // Utility functions
 const isValidPlacement = (board, row, col, size, orientation) => {
@@ -65,14 +65,14 @@ export const GameProvider = ({ children }) => {
   const location = useLocation();
   const [gameState, setGameState] = useState(() => {
     const savedState = localStorage.getItem('battleshipGame');
-    return savedState ? JSON.parse(savedState) : initialState;
+    return savedState ? JSON.parse(savedState) : createInitialState();
   });
 
   // Reset game state when navigating away from game pages
   useEffect(() => {
     if (!location.pathname.startsWith('/game/')) {
       localStorage.removeItem('battleshipGame');
-      setGameState(initialState);
+      setGameState(createInitialState());
     }
   }, [location]);
 
@@ -106,18 +106,17 @@ export const GameProvider = ({ children }) => {
     }
   }, [gameState.currentTurn, gameState.gameStatus, location]);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     localStorage.removeItem('battleshipGame');
-    setGameState(initialState);
-  };
+    setGameState(createInitialState());
+  }, []);
 
-  const setGameMode = (mode) => {
-    // Only set game mode if we're on a game page
+  const setGameMode = useCallback((mode) => {
     if (!location.pathname.startsWith('/game/')) {
       return;
     }
 
-    const newState = { ...initialState, mode };
+    const newState = { ...createInitialState(), mode };
     
     if (mode === 'freeplay' || mode === 'normal') {
       const stateWithAiShips = placeAiShips(newState);
@@ -129,7 +128,7 @@ export const GameProvider = ({ children }) => {
         setGameState(stateWithAiShips);
       }
     }
-  };
+  }, [location.pathname]);
 
   const placeShip = (board, ships, row, col, ship, orientation) => {
     if (!isValidPlacement(board, row, col, ship.size, orientation)) {

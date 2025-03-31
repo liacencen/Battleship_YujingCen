@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { GameContext } from '../context/GameContext';
 import Board from '../components/Board/Board';
@@ -45,6 +45,17 @@ const Game = () => {
   const [orientation, setOrientation] = useState('horizontal');
   const [isLoading, setIsLoading] = useState(true);
 
+  // Handle game reset
+  const handleReset = useCallback(() => {
+    setIsLoading(true);
+    resetGame();
+    // Short delay to ensure state is reset before setting new mode
+    setTimeout(() => {
+      setGameMode(params.mode);
+      setIsLoading(false);
+    }, 100);
+  }, [resetGame, setGameMode, params.mode]);
+
   // Reset game when component mounts or game mode changes
   useEffect(() => {
     const validModes = ['normal', 'freeplay'];
@@ -63,14 +74,11 @@ const Game = () => {
     if (!gameState.mode || 
         gameState.mode !== gameMode || 
         gameState.gameStatus === 'ended') {
-      resetGame();
-      setGameMode(gameMode);
+      handleReset();
+    } else {
+      setIsLoading(false);
     }
-
-    // Remove loading state after a short delay
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [params.mode, location.pathname, gameState.mode, gameState.gameStatus, resetGame, setGameMode, navigate]);
+  }, [params.mode, gameState.mode, gameState.gameStatus, handleReset, navigate]);
 
   // Toggle ship orientation
   const toggleOrientation = () => {
@@ -147,12 +155,10 @@ const Game = () => {
         {/* Restart button */}
         <button 
           className="restart-btn" 
-          onClick={() => {
-            resetGame();
-            setGameMode(params.mode);
-          }}
+          onClick={handleReset}
+          disabled={isLoading}
         >
-          Restart Game
+          {isLoading ? 'Restarting...' : 'Restart Game'}
         </button>
       </div>
     </ErrorBoundary>
