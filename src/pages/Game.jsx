@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { GameContext } from '../context/GameContext';
 import Board from '../components/Board/Board';
 import Timer from '../components/Timer/Timer';
 import ShipPlacement from '../components/ShipPlacement/ShipPlacement';
+import './Game.css';
 
 // Error boundary component
 class ErrorBoundary extends React.Component {
@@ -37,83 +38,54 @@ class ErrorBoundary extends React.Component {
 }
 
 const Game = () => {
-  // Get mode from URL params
   const params = useParams();
-  const gameMode = params.mode; // This should match the :mode parameter in your route
-  
   const navigate = useNavigate();
+  const location = useLocation();
   const { gameState, setGameMode, resetGame, getCurrentShip } = useContext(GameContext);
   const [orientation, setOrientation] = useState('horizontal');
   const [isLoading, setIsLoading] = useState(true);
-  
-  // For debugging
-  console.log("Game component rendered with mode:", gameMode);
-  console.log("Current game state:", gameState);
-  
-  // Reset localStorage on mount or if there's an issue
+
+  // Reset game when component mounts or game mode changes
   useEffect(() => {
-    const checkAndResetLocalStorage = () => {
-      try {
-        const savedState = localStorage.getItem('battleshipGame');
-        if (savedState) {
-          const parsedState = JSON.parse(savedState);
-          
-          // If saved mode doesn't match current mode, reset
-          if (parsedState.mode && parsedState.mode !== gameMode) {
-            console.log(`Mode mismatch: saved=${parsedState.mode}, current=${gameMode}. Resetting localStorage.`);
-            localStorage.removeItem('battleshipGame');
-          } 
-          // If game was ended but not cleared, reset
-          else if (parsedState.gameStatus === 'ended') {
-            console.log('Previous game was ended. Resetting localStorage.');
-            localStorage.removeItem('battleshipGame');
-          }
-        }
-      } catch (e) {
-        console.error("Error with localStorage, resetting:", e);
-        localStorage.removeItem('battleshipGame');
-      }
-    };
-    
-    checkAndResetLocalStorage();
-  }, [gameMode]);
-  
-  // Set game mode on component mount
-  useEffect(() => {
-    console.log("Setting game mode:", gameMode);
-    if (gameMode === 'normal' || gameMode === 'freeplay') {
-      setGameMode(gameMode);
-      // Give some time for state to update
-      setTimeout(() => setIsLoading(false), 500);
-    } else {
-      // Invalid mode, redirect to home
+    const validModes = ['normal', 'freeplay'];
+    const gameMode = params.mode;
+
+    if (!validModes.includes(gameMode)) {
       console.error("Invalid game mode:", gameMode);
       navigate('/');
+      return;
     }
-  }, [gameMode, setGameMode, navigate]);
-  
-  // Monitor game state changes
-  useEffect(() => {
-    console.log("Game state updated:", gameState);
-    if (gameState.mode) {
-      setIsLoading(false);
+
+    // Reset game state if:
+    // 1. No game state exists
+    // 2. Current mode doesn't match URL mode
+    // 3. Game has ended
+    if (!gameState.mode || 
+        gameState.mode !== gameMode || 
+        gameState.gameStatus === 'ended') {
+      resetGame();
+      setGameMode(gameMode);
     }
-  }, [gameState]);
-  
+
+    // Remove loading state after a short delay
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [params.mode, location.pathname, gameState.mode, gameState.gameStatus, resetGame, setGameMode, navigate]);
+
   // Toggle ship orientation
   const toggleOrientation = () => {
     setOrientation(prev => prev === 'horizontal' ? 'vertical' : 'horizontal');
   };
-  
+
   // Get current ship to place
   const currentShip = getCurrentShip();
-  
+
   // Render ship placement UI for freeplay mode
   const renderShipPlacement = () => {
     if (gameState.mode !== 'freeplay' || gameState.gameStatus !== 'setup') {
       return null;
     }
-    
+
     return (
       <div className="ship-placement-container">
         <h2>Place Your Ships</h2>
@@ -134,18 +106,18 @@ const Game = () => {
       </div>
     );
   };
-  
+
   // Show loading state
   if (isLoading || !gameState || !gameState.mode) {
     return (
       <div className="game-container loading-container">
         <h1>Loading Game...</h1>
-        <p>Setting up {gameMode} mode</p>
+        <p>Setting up {params.mode} mode</p>
         <div className="loading-spinner"></div>
       </div>
     );
   }
-  
+
   return (
     <ErrorBoundary>
       <div className="game-container">
@@ -173,12 +145,14 @@ const Game = () => {
         </div>
         
         {/* Restart button */}
-        <button className="restart-btn" onClick={() => {
-          resetGame();
-          // Force page reload to ensure clean state
-          window.location.reload();
-        }}>
-          Restart
+        <button 
+          className="restart-btn" 
+          onClick={() => {
+            resetGame();
+            setGameMode(params.mode);
+          }}
+        >
+          Restart Game
         </button>
       </div>
     </ErrorBoundary>

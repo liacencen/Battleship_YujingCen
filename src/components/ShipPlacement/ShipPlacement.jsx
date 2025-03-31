@@ -1,5 +1,6 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { GameContext } from '../../context/GameContext';
+import './ShipPlacement.css';
 
 const ShipPlacement = ({ ship, orientation }) => {
   const { placePlayerShip, gameState } = useContext(GameContext);
@@ -18,11 +19,15 @@ const ShipPlacement = ({ ship, orientation }) => {
   
   // Handle cell click - place ship
   const handleCellClick = (row, col) => {
-    placePlayerShip(row, col, orientation);
+    if (isValidPlacement(row, col)) {
+      placePlayerShip(row, col, orientation);
+      setHoverPosition(null);
+    }
   };
   
   // Handle ship drag start
   const handleDragStart = (e) => {
+    e.preventDefault();
     setIsDragging(true);
     
     // Calculate drag offset
@@ -53,24 +58,21 @@ const ShipPlacement = ({ ship, orientation }) => {
     const col = Math.floor(x / cellSize);
     const row = Math.floor(y / cellSize);
     
-    // Update hover position
+    // Update hover position if within grid bounds
     if (row >= 0 && row < 10 && col >= 0 && col < 10) {
       setHoverPosition({ row, col });
     }
   };
   
   // Handle ship drag end
-  const handleDragEnd = (e) => {
-    setIsDragging(false);
-    
-    // Remove event listeners
-    document.removeEventListener('mousemove', handleDragMove);
-    document.removeEventListener('mouseup', handleDragEnd);
-    
-    // Place ship at current hover position
-    if (hoverPosition && isValidPlacement(hoverPosition.row, hoverPosition.col)) {
+  const handleDragEnd = () => {
+    if (isDragging && hoverPosition && isValidPlacement(hoverPosition.row, hoverPosition.col)) {
       handleCellClick(hoverPosition.row, hoverPosition.col);
     }
+    
+    setIsDragging(false);
+    document.removeEventListener('mousemove', handleDragMove);
+    document.removeEventListener('mouseup', handleDragEnd);
   };
   
   // Clean up event listeners
@@ -83,8 +85,6 @@ const ShipPlacement = ({ ship, orientation }) => {
   
   // Check if ship can be placed at current hover position
   const isValidPlacement = (row, col) => {
-    if (!hoverPosition) return false;
-    
     // Check if ship fits on board
     if (orientation === 'horizontal' && col + ship.size > 10) return false;
     if (orientation === 'vertical' && row + ship.size > 10) return false;
@@ -102,13 +102,15 @@ const ShipPlacement = ({ ship, orientation }) => {
     return true;
   };
   
-  // Render the placement grid
   return (
     <div className="placement-container">
       <div className="ship-preview">
         <div 
           className={`ship-drag ${orientation}`} 
-          style={{ width: orientation === 'horizontal' ? ship.size * 30 : 30, height: orientation === 'vertical' ? ship.size * 30 : 30 }}
+          style={{ 
+            width: orientation === 'horizontal' ? `${ship.size * 30}px` : '30px',
+            height: orientation === 'vertical' ? `${ship.size * 30}px` : '30px'
+          }}
           onMouseDown={handleDragStart}
         >
           {ship.name}
@@ -119,7 +121,6 @@ const ShipPlacement = ({ ship, orientation }) => {
         {grid.map((row, rowIndex) => (
           <div key={`row-${rowIndex}`} className="placement-row">
             {row.map((_, colIndex) => {
-              // Determine if this cell is part of the hover preview
               const isShipPreview = hoverPosition && 
                 ((orientation === 'horizontal' && 
                   rowIndex === hoverPosition.row && 
@@ -130,13 +131,15 @@ const ShipPlacement = ({ ship, orientation }) => {
                   rowIndex >= hoverPosition.row && 
                   rowIndex < hoverPosition.row + ship.size));
               
-              // Determine if placement is valid
-              const isValid = hoverPosition && isValidPlacement(hoverPosition.row, hoverPosition.col);
+              const isValid = isShipPreview && isValidPlacement(hoverPosition.row, hoverPosition.col);
               
               return (
                 <div
                   key={`cell-${rowIndex}-${colIndex}`}
-                  className={`placement-cell ${isShipPreview ? (isValid ? 'valid-placement' : 'invalid-placement') : ''} ${gameState.playerBoard[rowIndex][colIndex] === 'ship' ? 'occupied' : ''}`}
+                  className={`placement-cell 
+                    ${isShipPreview ? (isValid ? 'valid-placement' : 'invalid-placement') : ''} 
+                    ${gameState.playerBoard[rowIndex][colIndex] === 'ship' ? 'occupied' : ''}`
+                  }
                   onMouseEnter={() => handleCellHover(rowIndex, colIndex)}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
                 />

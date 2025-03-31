@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // Create context
 export const GameContext = createContext();
@@ -14,19 +15,18 @@ const SHIPS = [
 
 // Initial game state
 const initialState = {
-  mode: null, // 'normal' or 'freeplay'
+  mode: null,
   playerBoard: Array(10).fill().map(() => Array(10).fill(null)),
   aiBoard: Array(10).fill().map(() => Array(10).fill(null)),
-  playerShips: SHIPS.map(ship => ({ ...ship, placed: false, positions: [] })),
-  aiShips: SHIPS.map(ship => ({ ...ship, placed: false, positions: [] })),
-  gameStatus: 'setup', // 'setup', 'playing', 'ended'
+  playerShips: SHIPS.map(ship => ({ ...ship, placed: false, positions: [], hits: 0 })),
+  aiShips: SHIPS.map(ship => ({ ...ship, placed: false, positions: [], hits: 0 })),
+  gameStatus: 'setup',
   currentTurn: 'player',
   winner: null,
   timer: 0,
   playerMoves: [],
   aiMoves: [],
-  currentShipToPlace: 0,
-  draggedShip: null
+  currentShipToPlace: 0
 };
 
 // Utility functions
@@ -62,343 +62,254 @@ const getRandomPosition = (board, shipSize) => {
 };
 
 export const GameProvider = ({ children }) => {
-  // Load from localStorage or use initialState
+  const location = useLocation();
   const [gameState, setGameState] = useState(() => {
     const savedState = localStorage.getItem('battleshipGame');
     return savedState ? JSON.parse(savedState) : initialState;
   });
 
+  // Reset game state when navigating away from game pages
+  useEffect(() => {
+    if (!location.pathname.startsWith('/game/')) {
+      localStorage.removeItem('battleshipGame');
+      setGameState(initialState);
+    }
+  }, [location]);
+
   // Save to localStorage when state changes
   useEffect(() => {
-    // Only save game state if it's not initial state and game has started
-    if (gameState.mode) {
-      // Don't save to localStorage if the game has ended
-      if (gameState.gameStatus === 'ended') {
-        console.log("Game ended, removing from localStorage");
-        localStorage.removeItem('battleshipGame');
-      } else {
-        console.log("Saving game state to localStorage:", gameState.mode, gameState.gameStatus);
-        localStorage.setItem('battleshipGame', JSON.stringify(gameState));
-      }
+    if (gameState.mode && gameState.gameStatus !== 'ended' && location.pathname.startsWith('/game/')) {
+      localStorage.setItem('battleshipGame', JSON.stringify(gameState));
     }
-  }, [gameState]);
+  }, [gameState, location]);
 
   // Timer functionality
   useEffect(() => {
     let interval = null;
-    
-    if (gameState.gameStatus === 'playing') {
+    if (gameState.gameStatus === 'playing' && location.pathname.startsWith('/game/')) {
       interval = setInterval(() => {
-        setGameState(prevState => ({
-          ...prevState,
-          timer: prevState.timer + 1
-        }));
+        setGameState(prev => ({ ...prev, timer: prev.timer + 1 }));
       }, 1000);
     }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [gameState.gameStatus]);
+    return () => interval && clearInterval(interval);
+  }, [gameState.gameStatus, location]);
 
-  // AI move after player's turn
+  // AI move logic
   useEffect(() => {
-    let timeout = null;
-    
-    if (gameState.gameStatus === 'playing' && gameState.currentTurn === 'ai' && !gameState.winner) {
-      timeout = setTimeout(() => {
-        makeAiMove();
-      }, 1000);
+    if (gameState.gameStatus === 'playing' && 
+        gameState.currentTurn === 'ai' && 
+        !gameState.winner && 
+        gameState.mode === 'normal' &&
+        location.pathname.startsWith('/game/')) {
+      const timeout = setTimeout(makeAiMove, 1000);
+      return () => clearTimeout(timeout);
     }
-    
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [gameState.currentTurn, gameState.gameStatus, gameState.winner]);
+  }, [gameState.currentTurn, gameState.gameStatus, location]);
 
-  // Reset game
   const resetGame = () => {
-    console.log("Resetting game and clearing localStorage");
     localStorage.removeItem('battleshipGame');
     setGameState(initialState);
   };
 
-  // Set game mode
   const setGameMode = (mode) => {
-    console.log("Setting game mode to:", mode);
-    setGameState(prevState => {
-      // Create new game state with selected mode
-      const newState = {
-        ...initialState,
-        mode
-      };
-      console.log("New state created:", newState);
-      
-      // If mode is freeplay, auto-place AI ships
-      if (mode === 'freeplay') {
-        const stateWithAiShips = placeAiShips(newState);
-        console.log("State with AI ships:", stateWithAiShips);
-        return stateWithAiShips;
-      }
-      
-      // If mode is normal, auto-place all ships
+    // Only set game mode if we're on a game page
+    if (!location.pathname.startsWith('/game/')) {
+      return;
+    }
+
+    const newState = { ...initialState, mode };
+    
+    if (mode === 'freeplay' || mode === 'normal') {
+      const stateWithAiShips = placeAiShips(newState);
       if (mode === 'normal') {
-        const stateWithAiShips = placeAiShips(newState);
         const finalState = placePlayerShipsAutomatically(stateWithAiShips);
-        console.log("Final state with all ships:", finalState);
-        return finalState;
+        finalState.gameStatus = 'playing';
+        setGameState(finalState);
+      } else {
+        setGameState(stateWithAiShips);
       }
-      
-      return newState;
-    });
+    }
   };
 
-  // Place AI ships randomly
-  const placeAiShips = (state) => {
-    const newState = { ...state };
-    const newBoard = JSON.parse(JSON.stringify(newState.aiBoard));
-    const newAiShips = [...newState.aiShips];
-    
-    newAiShips.forEach((ship, index) => {
-      const { row, col, orientation } = getRandomPosition(newBoard, ship.size);
-      const positions = [];
-      
-      // Place ship on board
-      for (let i = 0; i < ship.size; i++) {
-        const shipRow = orientation === 'horizontal' ? row : row + i;
-        const shipCol = orientation === 'horizontal' ? col + i : col;
-        
-        newBoard[shipRow][shipCol] = 'ship';
-        positions.push({ row: shipRow, col: shipCol });
-      }
-      
-      newAiShips[index] = {
-        ...ship,
-        placed: true,
-        positions,
-        orientation
-      };
-    });
-    
-    return {
-      ...newState,
-      aiBoard: newBoard,
-      aiShips: newAiShips
-    };
-  };
+  const placeShip = (board, ships, row, col, ship, orientation) => {
+    if (!isValidPlacement(board, row, col, ship.size, orientation)) {
+      return null;
+    }
 
-  // Auto-place player ships for normal mode
-  const placePlayerShipsAutomatically = (state) => {
-    const newState = { ...state };
-    const newBoard = JSON.parse(JSON.stringify(newState.playerBoard));
-    const newPlayerShips = [...newState.playerShips];
-    
-    newPlayerShips.forEach((ship, index) => {
-      const { row, col, orientation } = getRandomPosition(newBoard, ship.size);
-      const positions = [];
-      
-      // Place ship on board
-      for (let i = 0; i < ship.size; i++) {
-        const shipRow = orientation === 'horizontal' ? row : row + i;
-        const shipCol = orientation === 'horizontal' ? col + i : col;
-        
-        newBoard[shipRow][shipCol] = 'ship';
-        positions.push({ row: shipRow, col: shipCol });
-      }
-      
-      newPlayerShips[index] = {
-        ...ship,
-        placed: true,
-        positions,
-        orientation
-      };
-    });
-    
-    return {
-      ...newState,
-      playerBoard: newBoard,
-      playerShips: newPlayerShips,
-      gameStatus: 'playing'
-    };
-  };
-
-  // Start dragging a ship
-  const startDraggingShip = (shipId) => {
-    const shipIndex = gameState.playerShips.findIndex(ship => ship.id === shipId);
-    if (shipIndex === -1) return;
-    
-    setGameState(prevState => ({
-      ...prevState,
-      draggedShip: shipIndex
-    }));
-  };
-
-  // Stop dragging a ship
-  const stopDraggingShip = () => {
-    setGameState(prevState => ({
-      ...prevState,
-      draggedShip: null
-    }));
-  };
-
-  // Place player ships manually for freeplay mode
-  const placePlayerShip = (row, col, orientation) => {
-    if (gameState.gameStatus !== 'setup') return;
-    
-    const currentShipIndex = gameState.currentShipToPlace;
-    if (currentShipIndex >= gameState.playerShips.length) return;
-    
-    const ship = gameState.playerShips[currentShipIndex];
-    const newBoard = JSON.parse(JSON.stringify(gameState.playerBoard));
-    
-    // Check if placement is valid
-    if (!isValidPlacement(newBoard, row, col, ship.size, orientation)) return;
-    
+    const newBoard = [...board];
     const positions = [];
-    
-    // Place ship on board
+
     for (let i = 0; i < ship.size; i++) {
       const shipRow = orientation === 'horizontal' ? row : row + i;
       const shipCol = orientation === 'horizontal' ? col + i : col;
-      
       newBoard[shipRow][shipCol] = 'ship';
       positions.push({ row: shipRow, col: shipCol });
     }
-    
-    const newPlayerShips = [...gameState.playerShips];
-    newPlayerShips[currentShipIndex] = {
-      ...ship,
-      placed: true,
-      positions,
+
+    const newShips = ships.map(s => 
+      s.id === ship.id ? { ...s, placed: true, positions, orientation } : s
+    );
+
+    return { board: newBoard, ships: newShips };
+  };
+
+  const placePlayerShip = (row, col, orientation) => {
+    const currentShip = gameState.playerShips.find(ship => !ship.placed);
+    if (!currentShip) return;
+
+    const result = placeShip(
+      gameState.playerBoard,
+      gameState.playerShips,
+      row,
+      col,
+      currentShip,
       orientation
-    };
-    
-    // Check if all ships are placed
-    const allShipsPlaced = currentShipIndex === gameState.playerShips.length - 1;
-    
-    setGameState(prevState => ({
-      ...prevState,
-      playerBoard: newBoard,
-      playerShips: newPlayerShips,
-      currentShipToPlace: currentShipIndex + 1,
-      gameStatus: allShipsPlaced ? 'playing' : 'setup'
-    }));
+    );
+
+    if (result) {
+      const allShipsPlaced = result.ships.every(ship => ship.placed);
+      setGameState(prev => ({
+        ...prev,
+        playerBoard: result.board,
+        playerShips: result.ships,
+        gameStatus: allShipsPlaced ? 'playing' : 'setup'
+      }));
+    }
   };
 
-  // Start game
-  const startGame = () => {
-    setGameState(prevState => ({
-      ...prevState,
-      gameStatus: 'playing'
-    }));
+  const placeAiShips = (state) => {
+    let newBoard = [...state.aiBoard];
+    let newShips = [...state.aiShips];
+
+    state.aiShips.forEach(ship => {
+      let placed = false;
+      while (!placed) {
+        const orientation = Math.random() > 0.5 ? 'horizontal' : 'vertical';
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
+
+        const result = placeShip(newBoard, newShips, row, col, ship, orientation);
+        if (result) {
+          newBoard = result.board;
+          newShips = result.ships;
+          placed = true;
+        }
+      }
+    });
+
+    return { ...state, aiBoard: newBoard, aiShips: newShips };
   };
 
-  // Player move
+  const placePlayerShipsAutomatically = (state) => {
+    let newBoard = [...state.playerBoard];
+    let newShips = [...state.playerShips];
+
+    state.playerShips.forEach(ship => {
+      let placed = false;
+      while (!placed) {
+        const orientation = Math.random() > 0.5 ? 'horizontal' : 'vertical';
+        const row = Math.floor(Math.random() * 10);
+        const col = Math.floor(Math.random() * 10);
+
+        const result = placeShip(newBoard, newShips, row, col, ship, orientation);
+        if (result) {
+          newBoard = result.board;
+          newShips = result.ships;
+          placed = true;
+        }
+      }
+    });
+
+    return { ...state, playerBoard: newBoard, playerShips: newShips };
+  };
+
   const playerMove = (row, col) => {
-    if (
-      gameState.gameStatus !== 'playing' || 
-      gameState.currentTurn !== 'player' || 
-      gameState.aiBoard[row][col] === 'hit' || 
-      gameState.aiBoard[row][col] === 'miss'
-    ) {
+    if (gameState.gameStatus !== 'playing' || 
+        gameState.currentTurn !== 'player' || 
+        gameState.playerMoves.some(move => move.row === row && move.col === col)) {
       return;
     }
-    
-    const newAiBoard = JSON.parse(JSON.stringify(gameState.aiBoard));
+
+    const newAiBoard = [...gameState.aiBoard];
     const isHit = newAiBoard[row][col] === 'ship';
-    
     newAiBoard[row][col] = isHit ? 'hit' : 'miss';
-    
-    const newPlayerMoves = [...gameState.playerMoves, { row, col, result: isHit ? 'hit' : 'miss' }];
-    
-    // Check if player won
-    const playerWon = checkForWin(newAiBoard, gameState.aiShips);
-    
-    setGameState(prevState => ({
-      ...prevState,
+
+    const newAiShips = [...gameState.aiShips].map(ship => {
+      if (ship.positions.some(pos => pos.row === row && pos.col === col)) {
+        return { ...ship, hits: ship.hits + 1 };
+      }
+      return ship;
+    });
+
+    const newState = {
+      ...gameState,
       aiBoard: newAiBoard,
-      playerMoves: newPlayerMoves,
-      currentTurn: playerWon ? 'player' : 'ai',
-      winner: playerWon ? 'player' : null,
-      gameStatus: playerWon ? 'ended' : 'playing'
-    }));
+      aiShips: newAiShips,
+      playerMoves: [...gameState.playerMoves, { row, col, result: isHit ? 'hit' : 'miss' }],
+      currentTurn: gameState.mode === 'normal' ? 'ai' : 'player'
+    };
+
+    const playerWon = newAiShips.every(ship => ship.hits === ship.size);
+    if (playerWon) {
+      newState.winner = 'player';
+      newState.gameStatus = 'ended';
+    }
+
+    setGameState(newState);
   };
 
-  // AI move
   const makeAiMove = () => {
     if (gameState.gameStatus !== 'playing' || gameState.currentTurn !== 'ai') {
       return;
     }
-    
-    const newPlayerBoard = JSON.parse(JSON.stringify(gameState.playerBoard));
-    
-    // Get a random unplayed position
+
     let row, col;
     do {
       row = Math.floor(Math.random() * 10);
       col = Math.floor(Math.random() * 10);
-    } while (
-      newPlayerBoard[row][col] === 'hit' || 
-      newPlayerBoard[row][col] === 'miss'
-    );
-    
+    } while (gameState.aiMoves.some(move => move.row === row && move.col === col));
+
+    const newPlayerBoard = [...gameState.playerBoard];
     const isHit = newPlayerBoard[row][col] === 'ship';
-    
     newPlayerBoard[row][col] = isHit ? 'hit' : 'miss';
-    
-    const newAiMoves = [...gameState.aiMoves, { row, col, result: isHit ? 'hit' : 'miss' }];
-    
-    // Check if AI won
-    const aiWon = checkForWin(newPlayerBoard, gameState.playerShips);
-    
-    setGameState(prevState => ({
-      ...prevState,
-      playerBoard: newPlayerBoard,
-      aiMoves: newAiMoves,
-      currentTurn: aiWon ? 'ai' : 'player',
-      winner: aiWon ? 'ai' : null,
-      gameStatus: aiWon ? 'ended' : 'playing'
-    }));
-  };
 
-  // Check if a player has won
-  const checkForWin = (board, ships) => {
-    // A player wins when all opponent's ships are hit
-    for (const ship of ships) {
-      let allPositionsHit = true;
-      
-      for (const position of ship.positions) {
-        if (board[position.row][position.col] !== 'hit') {
-          allPositionsHit = false;
-          break;
-        }
+    const newPlayerShips = [...gameState.playerShips].map(ship => {
+      if (ship.positions.some(pos => pos.row === row && pos.col === col)) {
+        return { ...ship, hits: ship.hits + 1 };
       }
-      
-      if (!allPositionsHit) return false;
+      return ship;
+    });
+
+    const newState = {
+      ...gameState,
+      playerBoard: newPlayerBoard,
+      playerShips: newPlayerShips,
+      aiMoves: [...gameState.aiMoves, { row, col, result: isHit ? 'hit' : 'miss' }],
+      currentTurn: 'player'
+    };
+
+    const aiWon = newPlayerShips.every(ship => ship.hits === ship.size);
+    if (aiWon) {
+      newState.winner = 'ai';
+      newState.gameStatus = 'ended';
     }
-    
-    return true;
+
+    setGameState(newState);
   };
 
-  // Get current ship to place
   const getCurrentShip = () => {
-    return gameState.playerShips[gameState.currentShipToPlace] || null;
+    return gameState.playerShips.find(ship => !ship.placed);
   };
 
   return (
-    <GameContext.Provider
-      value={{
-        gameState,
-        resetGame,
-        setGameMode,
-        startGame,
-        playerMove,
-        placePlayerShip,
-        getCurrentShip,
-        startDraggingShip,
-        stopDraggingShip
-      }}
-    >
+    <GameContext.Provider value={{
+      gameState,
+      setGameMode,
+      resetGame,
+      playerMove,
+      placePlayerShip,
+      getCurrentShip
+    }}>
       {children}
     </GameContext.Provider>
   );

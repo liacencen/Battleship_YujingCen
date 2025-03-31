@@ -1,0 +1,51 @@
+.cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.cell:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Ship cell */
+.cell.ship {
+  background-color: #90a4ae;
+}
+
+/* Hit cell */
+.cell.hit {
+  background-color: #ffcdd2;
+}
+
+.hit-marker {
+  color: #d32f2f;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
+/* Miss cell */
+.cell.miss {
+  background-color: #c8e6c9;
+}
+
+.miss-marker {
+  color: #388e3c;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .cell {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8em;
+  }
+} 

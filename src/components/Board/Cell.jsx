@@ -1,47 +1,30 @@
 import React from 'react';
+import './Cell.css';
 
-const Cell = ({ type, value, onClick }) => {
-  // Generate class names based on cell state
-  const getCellClassName = () => {
-    let className = 'grid-cell';
+const Cell = ({ type, state, onClick }) => {
+  const getClassName = () => {
+    const classes = ['cell'];
     
-    if (value === 'hit') {
-      className += ' hit';
-    } else if (value === 'miss') {
-      className += ' miss';
-    } else if (value === 'ship' && type === 'player') {
-      className += ' ship';
+    if (state === 'ship' && type === 'player') {
+      classes.push('ship');
+    }
+    if (state === 'hit') {
+      classes.push('hit');
+    }
+    if (state === 'miss') {
+      classes.push('miss');
     }
     
-    return className;
+    return classes.join(' ');
   };
-  
-  // Determine which icon to display
-  const renderIcon = () => {
-    if (value === 'hit') {
-      return 'X'; // Red X for hits
-    } else if (value === 'miss') {
-      return '✓'; // Green check for misses
-    } else if (value === 'ship' && type === 'player') {
-      return '●'; // Black dot for ships on player's board
-    }
-    return null;
-  };
-  
-  // Don't allow clicking on cells that are already hit or missed
-  const handleClick = () => {
-    if (value !== 'hit' && value !== 'miss') {
-      onClick();
-    }
-  };
-  
+
   return (
     <div 
-      className={getCellClassName()}
-      onClick={handleClick}
-      title={`${type === 'player' ? 'Your' : 'Enemy'} board cell`}
+      className={getClassName()}
+      onClick={onClick}
     >
-      {renderIcon()}
+      {state === 'hit' && <span className="hit-marker">X</span>}
+      {state === 'miss' && <span className="miss-marker">•</span>}
     </div>
   );
 };

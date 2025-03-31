@@ -1,0 +1,101 @@
+.placement-container {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ship-preview {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.ship-drag {
+  background-color: #90a4ae;
+  border: 2px solid #62757f;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  user-select: none;
+  color: white;
+  font-weight: bold;
+  padding: 5px;
+  transition: transform 0.2s;
+}
+
+.ship-drag:hover {
+  transform: scale(1.05);
+}
+
+.ship-drag.horizontal {
+  min-width: 30px;
+}
+
+.ship-drag.vertical {
+  min-height: 30px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.placement-grid {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #333;
+  background-color: #e3f2fd;
+  margin-bottom: 20px;
+}
+
+.placement-row {
+  display: flex;
+}
+
+.placement-cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #999;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.placement-cell:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.placement-cell.valid-placement {
+  background-color: rgba(76, 175, 80, 0.3);
+}
+
+.placement-cell.invalid-placement {
+  background-color: rgba(244, 67, 54, 0.3);
+}
+
+.placement-cell.occupied {
+  background-color: #90a4ae;
+}
+
+.orientation-btn {
+  margin: 10px 0;
+  padding: 8px 16px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.orientation-btn:hover {
+  background-color: #1976d2;
+}
+
+.placement-help {
+  color: #666;
+  font-style: italic;
+  margin-top: 10px;
+  text-align: center;
+} 
