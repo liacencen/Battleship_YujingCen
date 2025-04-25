@@ -61,6 +61,16 @@ const getRandomPosition = (board, shipSize) => {
   return { row, col, orientation };
 };
 
+// Add new utility function for focused targeting
+const findAdjacentCells = (row, col) => {
+  return [
+    { row: row - 1, col }, // up
+    { row: row + 1, col }, // down
+    { row, col: col - 1 }, // left
+    { row, col: col + 1 }  // right
+  ].filter(({ row, col }) => row >= 0 && row < 10 && col >= 0 && col < 10);
+};
+
 export const GameProvider = ({ children }) => {
   const location = useLocation();
   const [gameState, setGameState] = useState(() => {
@@ -263,16 +273,38 @@ export const GameProvider = ({ children }) => {
     }
 
     let row, col;
-    do {
-      row = Math.floor(Math.random() * 10);
-      col = Math.floor(Math.random() * 10);
-    } while (gameState.aiMoves.some(move => move.row === row && move.col === col));
+    let newPlayerBoard = [...gameState.playerBoard];
+    let newPlayerShips = [...gameState.playerShips];
 
-    const newPlayerBoard = [...gameState.playerBoard];
+    // First, check if there's a hit that hasn't been fully explored
+    const lastHit = gameState.aiMoves.find(move => move.result === 'hit');
+    if (lastHit) {
+      // Get adjacent cells that haven't been hit
+      const adjacentCells = findAdjacentCells(lastHit.row, lastHit.col)
+        .filter(({ row, col }) => !gameState.aiMoves.some(move => move.row === row && move.col === col));
+
+      if (adjacentCells.length > 0) {
+        // Randomly select one of the adjacent cells
+        const { row: targetRow, col: targetCol } = adjacentCells[
+          Math.floor(Math.random() * adjacentCells.length)
+        ];
+        row = targetRow;
+        col = targetCol;
+      }
+    }
+
+    // If no adjacent cells to hit, make a random move
+    if (row === undefined || col === undefined) {
+      do {
+        row = Math.floor(Math.random() * 10);
+        col = Math.floor(Math.random() * 10);
+      } while (gameState.aiMoves.some(move => move.row === row && move.col === col));
+    }
+
     const isHit = newPlayerBoard[row][col] === 'ship';
     newPlayerBoard[row][col] = isHit ? 'hit' : 'miss';
 
-    const newPlayerShips = [...gameState.playerShips].map(ship => {
+    newPlayerShips = newPlayerShips.map(ship => {
       if (ship.positions.some(pos => pos.row === row && pos.col === col)) {
         return { ...ship, hits: ship.hits + 1 };
       }

@@ -1,8 +1,17 @@
 services:
   - type: web
-    name: battleship
-    env: static
+    name: battleship-fullstack
+    env: node
     buildCommand: npm install && npm run build
+    startCommand: npm run prod
+    envVars:
+      - key: NODE_VERSION
+        value: 18.15.0
+      - key: MONGO
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /api/users/scores
     staticPublishPath: ./build
     routes:
       - type: rewrite

@@ -4,6 +4,7 @@ import { GameContext } from '../context/GameContext';
 import Board from '../components/Board/Board';
 import Timer from '../components/Timer/Timer';
 import ShipPlacement from '../components/ShipPlacement/ShipPlacement';
+import GameStatus from '../components/GameStatus/GameStatus';
 import './Game.css';
 
 // Error boundary component
@@ -137,12 +138,8 @@ const Game = () => {
         {/* Timer */}
         {gameState.gameStatus === 'playing' && <Timer />}
         
-        {/* Game status and winner */}
-        {gameState.winner && (
-          <div className="game-over">
-            <h2>Game over! {gameState.winner === 'player' ? 'You' : 'AI'} Won!</h2>
-          </div>
-        )}
+        {/* Game status */}
+        <GameStatus />
         
         <div className="boards-container">
           {/* Enemy Board */}
