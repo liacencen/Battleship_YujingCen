@@ -1,14 +1,14 @@
 services:
   - type: web
-    name: battleship-fullstack
+    name: battleship-game
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: npm install
     startCommand: npm run prod
     envVars:
-      - key: NODE_VERSION
-        value: 18.15.0
       - key: MONGO
-        sync: false
+        value: "mongodb+srv://liacenyjdafa:CyjzmI0812@cluster0.zzspr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+      - key: NODE_VERSION
+        value: "16.x"
       - key: JWT_SECRET
         generateValue: true
     healthCheckPath: /api/users/scores
