@@ -3,9 +3,7 @@ services:
     name: battleship-game
     env: node
     buildCommand: |
-      npm ci
-      cd frontend && npm ci && npm run build
-      cd ../backend && npm ci
+      npm ci && cd frontend && npm ci && npm run build && cd ../backend && npm ci
     startCommand: cd backend && node server.js
     envVars:
       - key: MONGO
