@@ -2,7 +2,10 @@ services:
   - type: web
     name: battleship-game
     env: node
-    buildCommand: npm install && cd frontend && npm install && npm run build && cd ../backend && npm install
+    buildCommand: |
+      npm ci
+      cd frontend && npm ci && npm run build
+      cd ../backend && npm ci
     startCommand: cd backend && node server.js
     envVars:
       - key: MONGO
@@ -11,6 +14,8 @@ services:
         value: "16.x"
       - key: JWT_SECRET
         generateValue: true
+      - key: CI
+        value: "true"
     healthCheckPath: /api/users/scores
     staticPublishPath: ./frontend/build
     routes:
